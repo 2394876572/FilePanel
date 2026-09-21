@@ -1,0 +1,590 @@
+/* =========================================================================
+   文件面板 FilePanel — 样式表
+   M1：工具栏 / 文件表格 / 状态栏 / 加载页。完整视觉打磨在 M6 统一进行。
+
+   色板采用 JavaFX 的 looked-up color 机制（等价于 CSS 变量）：
+   在 .root 上声明 -fp-* 变量，子节点直接引用；切换主题只需在同一节点上
+   追加 .theme-dark 类并重新声明这批变量，即可整树生效。
+   ========================================================================= */
+
+.root {
+    /* 浅色主题（默认） */
+    -fp-bg:            #f5f6f8;
+    -fp-surface:       #ffffff;
+    -fp-surface-alt:   #fafbfc;
+    -fp-border:        #e3e6ea;
+    -fp-border-strong: #cfd4da;
+    -fp-text:          #1f2328;
+    -fp-text-dim:      #6b7280;
+    -fp-accent:        #2563eb;
+    -fp-accent-soft:   #e8efff;
+    -fp-row-hover:     #f0f4ff;
+
+    -fx-font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: -fp-bg;
+}
+
+/* 深色主题：必须排在 .root 之后，否则同等特异度下会被覆盖 */
+.theme-dark {
+    -fp-bg:            #1b1d21;
+    -fp-surface:       #24262b;
+    -fp-surface-alt:   #2a2d33;
+    -fp-border:        #3a3e45;
+    -fp-border-strong: #4a4f57;
+    -fp-text:          #e6e8eb;
+    -fp-text-dim:      #9aa2ad;
+    -fp-accent:        #6ea8fe;
+    -fp-accent-soft:   #2b3a55;
+    -fp-row-hover:     #2f343d;
+}
+
+/* ============================== 主窗口 ============================== */
+
+.main-window {
+    -fx-background-color: -fp-bg;
+}
+
+.toolbar {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 0 0 1 0;
+}
+
+.root-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fp-text;
+}
+
+/* ============================== 按钮 ============================== */
+
+.button {
+    -fx-background-color: -fp-surface;
+    -fx-text-fill: -fp-text;
+    -fx-border-color: -fp-border-strong;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 5px 14px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -fp-accent-soft;
+    -fx-border-color: -fp-accent;
+}
+
+.button:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+.check-box {
+    -fx-text-fill: -fp-text;
+}
+
+/* ============================== 文件表格 ============================== */
+
+.file-table {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: transparent;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.file-table .column-header-background {
+    -fx-background-color: -fp-surface-alt;
+}
+
+.file-table .column-header,
+.file-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 0 1 1 0;
+    -fx-padding: 7px 8px;
+    -fx-size: 32px;
+}
+
+.file-table .column-header .label {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-weight: bold;
+}
+
+.file-table .table-row-cell {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 28px;
+}
+
+.file-table .table-row-cell:odd {
+    -fx-background-color: -fp-surface-alt;
+}
+
+.file-table .table-row-cell:hover {
+    -fx-background-color: -fp-row-hover;
+}
+
+.file-table .table-row-cell:selected {
+    -fx-background-color: -fp-accent-soft;
+}
+
+.file-table .table-row-cell .table-cell {
+    -fx-text-fill: -fp-text;
+    -fx-padding: 4px 8px;
+    -fx-border-color: transparent;
+}
+
+.file-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: -fp-text;
+}
+
+/* 目录行加粗，便于在“显示文件夹”打开时与文件区分 */
+.file-table .folder-row .table-cell {
+    -fx-font-weight: bold;
+}
+
+/* ============================== 状态栏 ============================== */
+
+.status-bar {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 1 0 0 0;
+}
+
+.status-label {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+}
+
+/* ============================== 搜索栏 ============================== */
+
+.search-bar {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 0 0 1 0;
+}
+
+.search-label {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12.5px;
+}
+
+.search-field {
+    -fx-background-color: -fp-bg;
+    -fx-text-fill: -fp-text;
+    -fx-prompt-text-fill: -fp-text-dim;
+    -fx-border-color: -fp-border-strong;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 10px;
+}
+
+.search-field:focused {
+    -fx-border-color: -fp-accent;
+    -fx-background-color: -fp-surface;
+}
+
+.search-clear {
+    -fx-padding: 5px 10px;
+}
+
+.search-hint {
+    -fx-text-fill: -fp-accent;
+    -fx-font-size: 12px;
+}
+
+/* 搜索范围：它改变的是"关键词去哪找"，比普通按钮更需要被看见，所以给它一点边界感 */
+.search-scope,
+.search-size-op {
+    -fx-background-color: -fp-bg;
+    -fx-border-color: -fp-border-strong;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-font-size: 12px;
+}
+
+.syntax-toggle {
+    -fx-padding: 5px 10px;
+    -fx-font-size: 12px;
+}
+
+.syntax-panel {
+    -fx-background-color: -fp-bg;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 1 0 0 0;
+}
+
+.syntax-title {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 11.5px;
+}
+
+.syntax-label {
+    -fx-text-fill: -fp-text;
+    -fx-font-size: 12px;
+}
+
+.syntax-tip {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 11.5px;
+}
+
+/* 可点击的语法例子：做成"看起来就能点"的浅色小按钮，而不是纯文字 */
+.syntax-example {
+    -fx-background-color: -fp-surface;
+    -fx-text-fill: -fp-accent;
+    -fx-border-color: -fp-border-strong;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 8px;
+    -fx-font-size: 11.5px;
+    -fx-cursor: hand;
+}
+
+.syntax-example:hover {
+    -fx-background-color: -fp-accent;
+    -fx-text-fill: white;
+}
+
+/* ============================== 分类侧栏 ============================== */
+
+.sidebar {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-title {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0 0 8px 0;
+}
+
+.sidebar-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-text-fill: -fp-text;
+}
+
+.sidebar-list .list-cell:filled:hover {
+    -fx-background-color: -fp-row-hover;
+}
+
+.sidebar-list .list-cell:filled:selected {
+    -fx-background-color: -fp-accent-soft;
+}
+
+.sidebar-item-name {
+    -fx-text-fill: -fp-text;
+    -fx-font-size: 13px;
+}
+
+.sidebar-item-count {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+}
+
+.sidebar-list .list-cell:filled:selected .sidebar-item-name {
+    -fx-text-fill: -fp-accent;
+    -fx-font-weight: bold;
+}
+
+.sidebar-list .list-cell:filled:selected .sidebar-item-count {
+    -fx-text-fill: -fp-accent;
+}
+
+/* ============================== 加载页 ============================== */
+
+.loading-view {
+    -fx-background-color: -fp-bg;
+}
+
+.loading-title {
+    -fx-font-size: 16px;
+    -fx-text-fill: -fp-text;
+}
+
+.loading-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fp-text;
+}
+
+.loading-hint {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fp-text-dim;
+}
+
+.loading-spinner {
+    -fx-progress-color: -fp-accent;
+}
+
+/* ============================== 详情对话框 ============================== */
+
+.details-area {
+    -fx-font-family: "Consolas", "Microsoft YaHei UI", monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: -fp-text;
+}
+
+.details-area .content {
+    -fx-background-color: -fp-surface;
+}
+
+/* ============================== 星标列 ============================== */
+
+/*
+   星标列必须清掉单元格默认的左右内边距：默认的 8px×2 会吃掉大半列宽，
+   导致 15px 的星号放不下、被 JavaFX 换成省略号（表现为一列莫名其妙的"…"）。
+*/
+.file-table .table-row-cell .table-cell.star-column-cell {
+    -fx-padding: 0;
+}
+
+.star-cell {
+    -fx-font-size: 15px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.star-on {
+    -fx-text-fill: #f5a623;
+}
+
+/*
+   未收藏用"清晰可见的浅灰"而不是接近背景的极浅灰：
+   实测 -fp-border-strong(#cfd4da) 在白底上几乎看不见，用户会以为这一列是坏的。
+   灰得明显、但明显不如图标色醒目，才是正确的对比关系。
+*/
+.star-off {
+    -fx-text-fill: #aab2bd;
+}
+
+.star-off:hover {
+    -fx-text-fill: #f5a623;
+}
+
+/* ============================== 标签 chip ============================== */
+
+.tag-chip {
+    -fx-background-color: -fp-accent-soft;
+    -fx-text-fill: -fp-accent;
+    -fx-background-radius: 9px;
+    -fx-padding: 1px 7px;
+    -fx-font-size: 11px;
+}
+
+.tag-chip-more {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 11px;
+    -fx-padding: 1px 4px;
+}
+
+/* 对话框里可点的标签 */
+.tag-chip-action {
+    -fx-background-color: -fp-accent-soft;
+    -fx-text-fill: -fp-accent;
+    -fx-background-radius: 9px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.tag-chip-action:hover {
+    -fx-background-color: -fp-accent;
+    -fx-text-fill: white;
+}
+
+.tag-chip-pending {
+    -fx-background-color: #e6f4ea;
+    -fx-text-fill: #1e7e34;
+    -fx-background-radius: 9px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+/* ============================== 最近使用卡片区 ============================== */
+
+.recent-strip {
+    -fx-background-color: -fp-surface;
+    -fx-border-color: -fp-border;
+    -fx-border-width: 0 0 1 0;
+}
+
+.recent-title {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.recent-empty {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+    -fx-padding: 12px 0;
+}
+
+.recent-card {
+    -fx-background-color: -fp-bg;
+    -fx-border-color: -fp-border;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 10px;
+    -fx-cursor: hand;
+}
+
+.recent-card:hover {
+    -fx-border-color: -fp-accent;
+    -fx-background-color: -fp-accent-soft;
+}
+
+.recent-card-name {
+    -fx-text-fill: -fp-text;
+    -fx-font-size: 12.5px;
+}
+
+.recent-card-meta {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 11px;
+}
+
+.recent-more {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+    -fx-padding: 22px 6px;
+}
+
+.recent-scroller,
+.recent-scroller > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.recent-collapse {
+    -fx-padding: 2px 10px;
+    -fx-font-size: 11px;
+}
+
+/* ============================== 对话框通用 ============================== */
+
+.dialog-headline {
+    -fx-text-fill: -fp-text;
+    -fx-font-size: 13px;
+}
+
+.dialog-dim {
+    -fx-text-fill: -fp-text-dim;
+    -fx-font-size: 12px;
+}
+
+.dialog-message {
+    -fx-font-size: 12px;
+}
+
+.dialog-error {
+    -fx-text-fill: #d93025;
+}
+
+.dialog-warning {
+    -fx-text-fill: #b26a00;
+}
+
+.rename-dot {
+    -fx-text-fill: -fp-text-dim;
+    -fx-padding: 0 4px;
+}
+
+/* 独立渲染面板（--settings-preview / --create-preview / --icon-sheet / --delete-test 的图集）
+   用的容器。它不属于任何对话框，所以要自带背景与内边距，否则截图里是纯白一片、
+   看不出控件的边界。 */
+.dialog-preview {
+    -fx-background-color: -fp-bg;
+    -fx-padding: 14px;
+}
+
+/* 危险操作：永久删除相关的一切都用红色，让用户不可能看错 */
+.danger-box {
+    -fx-border-color: #d93025;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+}
+
+.danger-check {
+    -fx-text-fill: #d93025;
+}
+
+.danger-button {
+    -fx-background-color: #d93025;
+    -fx-text-fill: white;
+    -fx-border-color: #b3261e;
+}
+
+.danger-button:hover {
+    -fx-background-color: #b3261e;
+    -fx-border-color: #8c1d18;
+}
+
+/* ============================== 批量重命名对话框 ============================== */
+
+.dialog-scroller,
+.dialog-scroller > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+/* 预览表的“状态”列：用颜色把问题行挑出来，避免用户漏看 */
+.rename-ok {
+    -fx-text-fill: #1e7e34;
+}
+
+.rename-unchanged {
+    -fx-text-fill: -fp-text-dim;
+}
+
+.rename-problem {
+    -fx-text-fill: #d93025;
+}
+
+.file-table .table-row-cell.rename-row-problem {
+    -fx-background-color: #fdecea;
+}
+
+.file-table .table-row-cell.rename-row-problem .table-cell {
+    -fx-text-fill: #8c1d18;
+}
+
+.file-table .table-row-cell.rename-row-unchanged .table-cell {
+    -fx-text-fill: -fp-text-dim;
+}
+/* ============================== 名称列的类型色块 ============================== */
+
+.kind-badge {
+    -fx-background-radius: 3px;
+}
+
+/*
+   名称列用的是自定义单元格（色块 + Label），Label 不会继承 .table-cell 的
+   -fx-text-fill —— 这里是深色主题下文件名"看不见"的根因，必须显式指定。
+*/
+.file-table .name-label {
+    -fx-text-fill: -fp-text;
+}
+
+.file-table .table-row-cell.folder-row .name-label {
+    -fx-font-weight: bold;
+}
+
+.file-table .table-row-cell.rename-row-problem .name-label {
+    -fx-text-fill: #8c1d18;
+}
+
+.file-table .table-row-cell.rename-row-unchanged .name-label {
+    -fx-text-fill: -fp-text-dim;
+}

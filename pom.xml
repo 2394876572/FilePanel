@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.zean.filepanel</groupId>
+  <artifactId>filepanel</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>文件面板 FilePanel</name>
+  <description>本地文件夹可视化管理工具（Windows 桌面 / JavaFX / 免装 Java 绿色分发）</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <!-- 写进 build-info.properties，便于确认"手上的这份是什么时候打的" -->
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+
+    <!--
+      为什么 JavaFX 必须显式写 <classifier>win</classifier>：
+      openjfx 在 Maven Central 上发布的「无 classifier」jar 只有 66 字节的 MANIFEST.MF（实测确认），
+      真正的 class 与原生 dll 都在 -win / -linux / -mac 分类包里。
+      不写 classifier 会得到空 jar，编译期直接报「找不到 javafx.* 包」。
+      本项目非目标即跨平台，故固定 win。同时显式声明全部 4 个模块，
+      避免传递依赖拉入无 classifier 的空 jar（空 jar 无害，但显式更清晰）。
+    -->
+    <javafx.version>17.0.13</javafx.version>
+    <javafx.platform>win</javafx.platform>
+
+    <junit.version>5.11.4</junit.version>
+    <jna.version>5.18.1</jna.version>
+    <jackson.version>2.17.3</jackson.version>
+    <pdfbox.version>3.0.3</pdfbox.version>
+
+    <!--
+      回收站集成测试的开关，默认关闭。
+      开启后测试会真实地向用户系统的回收站塞一个临时文件——这是不可忽略的副作用，
+      所以必须显式开启：scripts\mvn.cmd test -Dfilepanel.recycle.test=true
+    -->
+    <filepanel.recycle.test>false</filepanel.recycle.test>
+  </properties>
+
+  <dependencies>
+    <!-- ============ JavaFX（UI） ============ -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-base</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+
+    <!-- ============ Windows 原生互操作（M3 回收站、M8 系统图标） ============ -->
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>${jna.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna-platform</artifactId>
+      <version>${jna.version}</version>
+    </dependency>
+
+    <!-- ============ JSON 持久化（M1 索引缓存、M4 配置/最近/收藏/标签） ============ -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <!-- ============ PDF 文本抽取（M7 全文内容搜索，已确认引入） ============ -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+    </dependency>
+
+    <!-- ============ 测试 ============ -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- 固定产物名，便于 jpackage 的 main-jar 参数稳定引用（XML 注释内禁止出现连续两个短横线） -->
+    <finalName>filepanel</finalName>
+
+    <!--
+      资源过滤只对 build-info.properties 生效，用来把 JavaFX 版本固定进产物。
+      必须拆成两条 resource：若整目录开启 filtering，其他资源（如 CSS）的字节内容也会被改写，
+      将来一旦有人在 CSS 里写了类似 ${...} 的内容就会被静默替换掉。
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>build-info.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>build-info.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <!--
+        过滤 .properties 时若不显式指定编码，Maven 会沿用其他资源的编码并给出警告；
+        这里（以及 build-info.properties 里的中文）都需要 UTF-8。
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <configuration>
+          <propertiesEncoding>UTF-8</propertiesEncoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <release>17</release>
+          <encoding>UTF-8</encoding>
+          <compilerArgs>
+            <arg>-Xlint:unchecked</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <!-- 测试目录内含中文路径，强制 UTF-8 -->
+          <argLine>-Dfile.encoding=UTF-8 -Duser.language=zh -Duser.country=CN</argLine>
+          <systemPropertyVariables>
+            <!--
+              把 java.io.tmpdir 指到工程内：@TempDir 生成的测试数据留在 target 下，
+              既不污染系统临时目录，也不受外部目录写权限限制。
+            -->
+            <java.io.tmpdir>${project.build.directory}/test-tmp</java.io.tmpdir>
+            <!-- 透传给测试 JVM，使 -Dfilepanel.recycle.test=true 能生效 -->
+            <filepanel.recycle.test>${filepanel.recycle.test}</filepanel.recycle.test>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <!--
+                入口必须是 Launcher 而不是 MainApp。
+                若以继承 Application 的类作主类，从 classpath 启动时会报
+                "JavaFX runtime components are missing"。
+              -->
+              <mainClass>com.zean.filepanel.Launcher</mainClass>
+              <addClasspath>true</addClasspath>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!--
+        生成 jpackage 所需的两份输入目录（M6 打包用，但配置在 M0 一次到位）：
+          target/app    -> 应用 jar + 非 JavaFX 依赖（走 classpath）
+          target/javafx -> JavaFX 各模块 win 包（走 module-path，避免 unnamed module 警告）
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.7.1</version>
+        <executions>
+          <execution>
+            <id>copy-app-deps</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/app</outputDirectory>
+              <excludeGroupIds>org.openjfx</excludeGroupIds>
+              <includeScope>runtime</includeScope>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-javafx-deps</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/javafx</outputDirectory>
+              <includeGroupIds>org.openjfx</includeGroupIds>
+              <includeScope>runtime</includeScope>
+              <!--
+                必须排除传递依赖：4 个 JavaFX 模块已显式声明为 win 分类包，
+                而它们的 POM 会把「无 classifier 的空包」作为传递依赖再拉一遍。
+                空包虽无 class，却会被 module-path 当成自动模块 javafx.base 等，
+                与真实模块同名冲突（"Two versions of module javafx.base found"）。
+              -->
+              <excludeTransitive>true</excludeTransitive>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 开发期直接运行：mvn javafx:run -->
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <configuration>
+          <mainClass>com.zean.filepanel.Launcher</mainClass>
+          <options>
+            <option>-Dfile.encoding=UTF-8</option>
+            <!-- 与 selftest.cmd 保持一致：把 JavaFX 原生库缓存指到 target 下，
+                 避免默认的 %USERPROFILE%\.openjfx\cache 不可写时反复刷警告 -->
+            <option>-Djavafx.cachedir=${project.build.directory}/jfxcache</option>
+          </options>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

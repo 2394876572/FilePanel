@@ -1,0 +1,34 @@
+# 构建产物
+target/
+
+# 项目自带的工具链（体积大、可重新下载，不入版本库）
+#   tools/apache-maven-3.9.9/  由 scripts/fetch-maven.mjs 下载
+#   tools/m2repo/              本地依赖仓库（构建时自动填充）
+#   tools/wix314/              由 scripts/fetch-wix.mjs 下载（打 MSI 安装包才需要）
+tools/
+
+# 一次性诊断工具与验证输出。scratch/ 里是"用完即弃"的东西，
+# 同时它是排障证据的来源，所以留在本地、不进版本库。
+scratch/
+
+# 截图用的示例数据：由 demo\MakeDemo.java 生成，scripts\demo-screenshots.ps1 会重建它。
+# 生成器本身要进版本库（否则没人能复现那些截图），生成出来的文件不进——
+# 里面有 2MB 的噪点图和 384KB 的假 exe，没必要往仓库里塞。
+demo/示例文件夹/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# 运行期数据（绿色模式下可能出现在项目目录里）
+.filepanel/
+
+# 打包产物（如果被复制进项目目录）
+*.msi
+FilePanel-便携版-*.zip
+
+# 系统
+Thumbs.db
+desktop.ini
+.DS_Store
