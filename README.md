@@ -115,6 +115,7 @@ scripts\package.cmd installer  :: 打 MSI 安装包（需要先跑 scripts\fetch
 ```
 FilePanel\
 ├─ pom.xml                        Java 17 + JavaFX 17.0.13（必须显式带 win classifier）
+├─ LICENSE                        MIT
 ├─ assets\                        图标源（app.ico 给 jpackage，app.png 生成多尺寸窗口图标）
 ├─ src\main\java\com\zean\filepanel\
 │  ├─ core\                       纯逻辑：扫描、搜索解析、排除规则、删除策略、LRU
@@ -170,5 +171,7 @@ FilePanel --help                     帮助
 
 ## 许可证
 
-**尚未指定**。如果你要把它公开，请先选一个许可证（例如 MIT / Apache-2.0）并在此处补上——
-没有许可证的公开仓库，别人在法律上是不可以使用的。
+[MIT](LICENSE) © 2026 Lineer
+
+可以自由使用、修改、商用、再发布，只要保留版权声明与许可证文本。
+本软件按"现状"提供，不附带任何形式的担保。
